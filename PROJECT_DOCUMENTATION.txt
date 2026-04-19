@@ -1,0 +1,1409 @@
+═══════════════════════════════════════════════════════════════════════════════
+                         EVERSHOP - PROJECT DOCUMENTATION
+                    Complete Project Overview & Foundation Guide
+═══════════════════════════════════════════════════════════════════════════════
+
+Last Updated: April 19, 2026
+Project Status: Active Development
+
+═══════════════════════════════════════════════════════════════════════════════
+1. PROJECT OVERVIEW
+═══════════════════════════════════════════════════════════════════════════════
+
+PROJECT NAME: EverShop
+DESCRIPTION: A luxury e-commerce multi-vendor platform designed to support Administrators, 
+             Vendors, and Customers with a sophisticated marketplace experience.
+
+PRIMARY PURPOSE:
+- Multi-vendor marketplace for luxury goods
+- Admin dashboard for system management
+- Vendor management interface for product listings and order management
+- Customer storefront for browsing and purchasing products
+- Order management system with vendor-specific sub-orders
+
+TARGET USERS:
+1. Administrator - System management, user approval, category management, settings
+2. Vendor - Product management, sales tracking, order fulfillment
+3. Customer - Browse products, add to cart, place orders, track purchases
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. TECHNOLOGY STACK
+═══════════════════════════════════════════════════════════════════════════════
+
+FRONTEND:
+- Framework: React 19.2.0
+- Build Tool: Vite 7.2.4
+- Router: React Router DOM 7.11.0
+- Styling: Tailwind CSS 4.1.18
+- UI Icons: Heroicons React 2.2.0
+- Animation: Framer Motion 12.23.26
+- HTTP Client: Axios 1.13.2
+- Linting: ESLint 9.39.1
+- CSS Processing: PostCSS 8.5.6, Autoprefixer 10.4.23
+
+BACKEND:
+- Runtime: Node.js
+- Framework: Express 5.2.1
+- Database: PostgreSQL 8+ (with pg driver 8.16.3)
+- ORM/Query Builder: Sequelize 6.37.7
+- Authentication: JWT (jsonwebtoken 9.0.3)
+- Password Hashing: bcryptjs 3.0.3
+- File Upload: Multer 2.0.2
+- CORS: cors 2.8.5
+- Environment: dotenv 17.2.3
+- Development: Nodemon 3.1.11
+
+BUILD & DEPLOYMENT:
+- Root package manager: npm with Concurrently (9.1.2) for running client and server together
+- Start command: npm run dev (runs both client and server concurrently)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. PROJECT ARCHITECTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+ARCHITECTURE PATTERN: Three-Tier Architecture (Frontend - Backend - Database)
+
+SYSTEM DESIGN:
+```
+                        ┌─────────────────────┐
+                        │   React Frontend    │
+                        │   (Vite Based)      │
+                        └─────────┬───────────┘
+                                  │
+                    HTTP/REST API │ (Axios)
+                                  │
+        ┌─────────────────────────▼────────────────────────────┐
+        │         Express.js REST API Backend                  │
+        │  (/api/auth, /api/products, /api/vendor,             │
+        │   /api/orders, /api/admin, /api/reviews, etc.)       │
+        │                                                       │
+        │  Authentication: JWT Middleware                      │
+        │  Authorization: Role-based Access Control            │
+        │  File Upload: Multer (image uploads)                 │
+        └─────────────────────────┬────────────────────────────┘
+                                  │
+                      PostgreSQL   │ (pg driver)
+                      Connection   │ Query Builder
+                                  │
+                        ┌─────────▼───────────┐
+                        │   PostgreSQL DB     │
+                        │   (Production DB)   │
+                        └─────────────────────┘
+```
+
+FOLDER STRUCTURE:
+Root/
+├── client/                          # React Frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Auth/               # Authentication components
+│   │   │   │   ├── Login.jsx
+│   │   │   │   ├── Register.jsx
+│   │   │   │   └── ProtectedRoute.jsx
+│   │   │   ├── Admin/              # Admin dashboard components
+│   │   │   │   ├── AdminLayout.jsx
+│   │   │   │   ├── AdminDashboard.jsx
+│   │   │   │   └── CategoryManager.jsx
+│   │   │   ├── Vendor/             # Vendor dashboard components
+│   │   │   │   ├── VendorLayout.jsx
+│   │   │   │   ├── VendorDashboard.jsx
+│   │   │   │   └── AddProduct.jsx
+│   │   │   ├── Customer/           # Customer interface components
+│   │   │   │   ├── HomePage.jsx
+│   │   │   │   ├── ProductGrid.jsx
+│   │   │   │   ├── ProductDetailLuxury.jsx
+│   │   │   │   ├── Cart.jsx
+│   │   │   │   ├── SearchPage.jsx
+│   │   │   │   ├── VendorStoreFront.jsx
+│   │   │   │   ├── CategoryEditorial.jsx
+│   │   │   │   ├── CategoryShowcase.jsx
+│   │   │   │   ├── FilterSidebar.jsx
+│   │   │   │   ├── HeroCarousel.jsx
+│   │   │   │   ├── HeroLuxury.jsx
+│   │   │   │   ├── ProductCard.jsx
+│   │   │   │   ├── ProductCardLuxury.jsx
+│   │   │   │   ├── ServicePromise.jsx
+│   │   │   │   └── CategoryPages/
+│   │   │   │       ├── ElectronicsPage.jsx
+│   │   │   │       └── FashionPage.jsx
+│   │   │   ├── Common/             # Reusable components
+│   │   │   │   ├── EmptyState.jsx
+│   │   │   │   └── ProductCardSkeleton.jsx
+│   │   │   └── Navbar.jsx
+│   │   ├── api/
+│   │   │   └── axios.js            # Axios instance configuration
+│   │   ├── context/
+│   │   │   └── CartContext.jsx     # Global cart state management
+│   │   ├── assets/                 # Images, icons
+│   │   ├── App.jsx                 # Main App component with routing
+│   │   ├── App.css                 # Global styles
+│   │   ├── index.css               # Base CSS
+│   │   └── main.jsx                # Entry point
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── eslint.config.js
+│   ├── package.json
+│   └── public/
+│
+├── server/                          # Express Backend
+│   ├── config/
+│   │   └── db.js                   # Database connection pool
+│   ├── middleware/
+│   │   ├── auth.js                 # JWT authentication middleware
+│   │   └── roles.js                # Role-based authorization
+│   ├── routes/                     # API endpoints
+│   │   ├── auth.js                 # /api/auth (register, login)
+│   │   ├── products.js             # /api/products (CRUD operations)
+│   │   ├── vendor.js               # /api/vendor (vendor dashboard, stats)
+│   │   ├── orders.js               # /api/orders (order management)
+│   │   ├── admin.js                # /api/admin (admin functions)
+│   │   ├── reviews.js              # /api/reviews (product reviews)
+│   │   ├── storefront.js           # /api/storefront (customer viewing)
+│   │   └── social.js               # /api/social (social features)
+│   ├── uploads/                    # Uploaded product images
+│   ├── index.js                    # Main server entry point
+│   ├── schema.sql                  # Database schema definition
+│   ├── seed.js                     # Seed initial data
+│   ├── setup_db.js                 # Database setup script
+│   ├── execute_sql.js              # SQL execution utility
+│   ├── find_db_password.js         # Database config helper
+│   ├── upgrade_products.js         # Schema upgrade scripts
+│   ├── upgrade_vendor_profiles.js
+│   ├── upgrade_social.js
+│   ├── fix_schema.js               # Schema correction utility
+│   ├── package.json
+│   └── .env                        # Environment variables (not in repo)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4. DATABASE SCHEMA & STRUCTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+DATABASE: PostgreSQL (Required PostgreSQL 8.0+)
+
+TABLE: users
+├── id (SERIAL PRIMARY KEY)
+├── name (VARCHAR 255)
+├── email (VARCHAR 255, UNIQUE)
+├── password (VARCHAR 255, hashed with bcryptjs)
+├── role (ENUM: 'Administrator', 'Vendor', 'Customer') DEFAULT: 'Customer'
+├── is_approved (BOOLEAN) DEFAULT: FALSE
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+Purpose: Store all user accounts across different roles
+
+TABLE: vendor_profiles
+├── id (SERIAL PRIMARY KEY)
+├── user_id (INTEGER, UNIQUE FOREIGN KEY -> users.id)
+├── store_name (VARCHAR 255)
+├── store_logo_url (VARCHAR 255)
+├── store_description (TEXT)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+Purpose: Store vendor-specific information and storefront details
+
+TABLE: products
+├── id (SERIAL PRIMARY KEY)
+├── vendor_id (INTEGER FOREIGN KEY -> users.id)
+├── name (VARCHAR 255)
+├── description (TEXT)
+├── price (DECIMAL 10,2) CHECK >= 0
+├── stock_quantity (INTEGER) DEFAULT: 0 CHECK >= 0
+├── image_url (VARCHAR 255)
+├── category (VARCHAR 100)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+Purpose: Store product listings from vendors
+Index: idx_products_vendor (vendor_id)
+
+TABLE: orders
+├── id (SERIAL PRIMARY KEY)
+├── customer_id (INTEGER FOREIGN KEY -> users.id)
+├── status (VARCHAR 50) DEFAULT: 'Processing' (values: Processing, Shipped, Delivered, Cancelled)
+├── total_amount (DECIMAL 10,2) DEFAULT: 0.00
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+Purpose: Store main customer orders
+Index: idx_orders_customer (customer_id)
+
+TABLE: sub_orders
+├── id (SERIAL PRIMARY KEY)
+├── order_id (INTEGER FOREIGN KEY -> orders.id CASCADE)
+├── vendor_id (INTEGER FOREIGN KEY -> users.id CASCADE)
+├── sub_total (DECIMAL 10,2) DEFAULT: 0.00
+├── status (VARCHAR 50) DEFAULT: 'Processing'
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+Purpose: Store vendor-specific portions of orders (multi-vendor breakdown)
+
+TABLE: order_items
+├── id (SERIAL PRIMARY KEY)
+├── order_id (INTEGER FOREIGN KEY -> orders.id CASCADE)
+├── sub_order_id (INTEGER FOREIGN KEY -> sub_orders.id CASCADE)
+├── product_id (INTEGER FOREIGN KEY -> products.id)
+├── vendor_id (INTEGER FOREIGN KEY -> users.id)
+├── quantity (INTEGER) DEFAULT: 1 CHECK > 0
+├── price_at_purchase (DECIMAL 10,2)
+└── created_at (TIMESTAMP)
+Purpose: Store individual items within orders with vendor tracking
+Indexes: idx_order_items_order (order_id), idx_order_items_vendor (vendor_id)
+
+TABLE: categories
+├── id (SERIAL PRIMARY KEY)
+├── name (VARCHAR 255)
+├── parent_id (INTEGER FOREIGN KEY -> categories.id, nullable for root categories)
+└── created_at (TIMESTAMP)
+Purpose: Store product categories (hierarchical structure)
+
+TABLE: reviews
+├── id (SERIAL PRIMARY KEY)
+├── product_id (INTEGER FOREIGN KEY -> products.id CASCADE)
+├── user_id (INTEGER FOREIGN KEY -> users.id CASCADE)
+├── rating (INTEGER) CHECK: 1-5
+├── comment (TEXT)
+└── created_at (TIMESTAMP)
+Purpose: Store product reviews and ratings
+Index: idx_reviews_product (product_id)
+
+TABLE: system_settings
+├── key (VARCHAR 255 PRIMARY KEY)
+├── value (TEXT)
+└── updated_at (TIMESTAMP)
+Purpose: Store configuration values (commission rates, fees, etc.)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5. API ROUTES & ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+BASE URL: http://localhost:5001/api/
+
+AUTHENTICATION ROUTES (/api/auth)
+├── POST /register
+│   ├── Body: { name, email, password, role? }
+│   ├── Response: { message, user }
+│   └── Role: Public
+│
+├── POST /login
+│   ├── Body: { email, password }
+│   ├── Response: { token, user }
+│   ├── Returns: JWT token for authenticated requests
+│   └── Role: Public
+│
+└── Notes: Uses JWT for subsequent authenticated requests
+
+PRODUCT ROUTES (/api/products)
+├── GET / 
+│   ├── Response: Array of all products with vendor details
+│   └── Role: Public
+│
+├── GET /:id
+│   ├── Response: Single product details
+│   └── Role: Public
+│
+├── POST /
+│   ├── Body: { name, description, price, stock_quantity, category, image }
+│   ├── Required Auth: JWT
+│   ├── Response: Created product object
+│   └── Role: Vendor (must have vendor profile)
+│
+├── PUT /:id
+│   ├── Body: Updatable product fields
+│   ├── Required Auth: JWT
+│   ├── Check: User must be product vendor
+│   └── Role: Vendor
+│
+├── DELETE /:id
+│   ├── Required Auth: JWT
+│   ├── Check: User must be product vendor
+│   └── Role: Vendor
+│
+└── POST /:id/upload (Image upload)
+    ├── Method: Multer file upload
+    ├── Stores in: /uploads/
+    └── Role: Vendor
+
+VENDOR ROUTES (/api/vendor)
+├── GET /stats
+│   ├── Required Auth: JWT
+│   ├── Response: { totalSales, pendingOrders, lowStock }
+│   └── Role: Vendor
+│
+├── GET /products
+│   ├── Required Auth: JWT
+│   ├── Response: Array of vendor's products
+│   └── Role: Vendor
+│
+├── GET /orders
+│   ├── Required Auth: JWT
+│   ├── Response: Vendor's sub-orders
+│   └── Role: Vendor
+│
+├── PUT /orders/:orderId
+│   ├── Body: { status }
+│   ├── Required Auth: JWT
+│   └── Role: Vendor
+│
+└── GET /profile
+    ├── Required Auth: JWT
+    ├── Response: Vendor profile info
+    └── Role: Vendor
+
+ORDER ROUTES (/api/orders)
+├── GET /
+│   ├── Required Auth: JWT
+│   ├── Response: User's orders (customer or vendor sub-orders)
+│   └── Role: Customer, Vendor
+│
+├── POST /
+│   ├── Body: { items: [{ productId, quantity }, ...] }
+│   ├── Required Auth: JWT
+│   ├── Creates: Main order + sub-orders per vendor
+│   └── Role: Customer
+│
+├── GET /:id
+│   ├── Required Auth: JWT
+│   ├── Response: Order details with all items
+│   └── Role: Customer (owner), Vendor (if has items)
+│
+├── PUT /:id
+│   ├── Body: { status }
+│   ├── Required Auth: JWT
+│   └── Role: Customer (cancel), Vendor (update status)
+│
+└── DELETE /:id
+    ├── Required Auth: JWT
+    └── Role: Administrator, Customer (owner)
+
+ADMIN ROUTES (/api/admin)
+├── GET /users
+│   ├── Required Auth: JWT
+│   ├── Response: All users with details
+│   └── Role: Administrator
+│
+├── PUT /users/:userId/approve
+│   ├── Body: { approved: boolean }
+│   ├── Approves/rejects vendor registrations
+│   └── Role: Administrator
+│
+├── GET /categories
+│   ├── Response: All product categories
+│   └── Role: Public
+│
+├── POST /categories
+│   ├── Body: { name, parent_id? }
+│   ├── Required Auth: JWT
+│   └── Role: Administrator
+│
+├── PUT /categories/:id
+│   ├── Body: Updatable category fields
+│   └── Role: Administrator
+│
+├── DELETE /categories/:id
+│   └── Role: Administrator
+│
+└── GET /settings
+    ├── Response: System settings
+    └── Role: Administrator
+
+REVIEW ROUTES (/api/reviews)
+├── GET /product/:productId
+│   ├── Response: All reviews for a product
+│   └── Role: Public
+│
+├── POST /
+│   ├── Body: { productId, rating, comment }
+│   ├── Required Auth: JWT
+│   └── Role: Customer
+│
+├── PUT /:id
+│   ├── Body: { rating, comment }
+│   ├── Required Auth: JWT
+│   └── Role: Review owner
+│
+└── DELETE /:id
+    ├── Required Auth: JWT
+    └── Role: Review owner, Administrator
+
+STOREFRONT ROUTES (/api/storefront)
+├── GET /vendor/:vendorId
+│   ├── Response: Vendor profile + products
+│   └── Role: Public
+│
+├── GET /categories
+│   ├── Response: Product categories
+│   └── Role: Public
+│
+├── GET /search
+│   ├── Query: { q: searchTerm, category?, minPrice?, maxPrice? }
+│   ├── Response: Filtered products
+│   └── Role: Public
+│
+└── GET /trending
+    ├── Response: Popular/trending products
+    └── Role: Public
+
+SOCIAL ROUTES (/api/social) [Optional/Expandable]
+├── POST /wishlist
+│   ├── Required Auth: JWT
+│   └── Role: Customer
+│
+└── GET /recommendations
+    ├── Required Auth: JWT (Optional)
+    └── Role: Public/Customer
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6. AUTHENTICATION & AUTHORIZATION SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+AUTHENTICATION METHOD: JWT (JSON Web Tokens)
+
+FLOW:
+1. User registers with email, password, and optional role
+2. Password hashed using bcryptjs (salt rounds: 10)
+3. User logs in with email and password
+4. Backend verifies credentials and returns JWT token
+5. Client stores token (typically in localStorage or sessionStorage)
+6. Client includes token in Authorization header for protected requests
+7. Server middleware validates token before processing request
+
+TOKEN PAYLOAD:
+{
+  id: number (user ID),
+  role: string ('Administrator' | 'Vendor' | 'Customer'),
+  iat: number (issued at),
+  exp: number (expiration time)
+}
+
+MIDDLEWARE: /server/middleware/auth.js
+- Function: authenticateToken(req, res, next)
+- Checks Authorization header for "Bearer {token}"
+- Verifies JWT signature using JWT_SECRET
+- Attaches user object to req.user for use in route handlers
+- Returns 401 Unauthorized if token missing or invalid
+
+AUTHORIZATION SYSTEM: Role-Based Access Control (RBAC)
+
+USER ROLES:
+1. ADMINISTRATOR
+   ├── Permissions:
+   │   ├── View all users
+   │   ├── Approve/reject vendor registrations
+   │   ├── Manage product categories
+   │   ├── View system statistics
+   │   ├── Manage system settings
+   │   ├── Moderate reviews
+   │   └── Access admin dashboard
+   └── Routes: /admin/*
+   
+2. VENDOR
+   ├── Permissions:
+   │   ├── Create/edit/delete own products
+   │   ├── View own sales and orders
+   │   ├── Update order status for own orders
+   │   ├── View vendor analytics
+   │   ├── Manage vendor profile
+   │   └── Upload product images
+   └── Routes: /vendor/*
+   
+3. CUSTOMER
+   ├── Permissions:
+   │   ├── Browse all products
+   │   ├── Search and filter products
+   │   ├── Add products to cart
+   │   ├── Place orders
+   │   ├── View own orders
+   │   ├── Leave reviews
+   │   ├── View vendor storefronts
+   │   └── Manage account
+   └── Routes: /account/*, /cart, /search, etc.
+
+COMPONENT: ProtectedRoute.jsx
+- Wraps routes requiring authentication
+- Checks if user is logged in (JWT token present)
+- Validates user role against allowedRoles prop
+- Redirects to login if unauthorized
+- Prevents direct URL access to protected pages
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7. FRONTEND STRUCTURE & COMPONENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+MAIN APPLICATION: App.jsx
+- Router setup using React Router DOM v7
+- Route definitions for all pages and dashboards
+- Protected route wrapping for role-based pages
+- Global Footer component
+- CartProvider context wrapper
+
+ROUTING STRUCTURE:
+
+PUBLIC ROUTES (No Authentication Required):
+├── / (HomePage)
+│   ├── HeroCarousel
+│   ├── ProductGrid
+│   ├── ServicePromise
+│   └── CategoryShowcase
+├── /search (SearchPage)
+│   └── Filter + Search Results
+├── /product/:id (ProductDetailLuxury)
+│   ├── Product images
+│   ├── Product details
+│   ├── Reviews
+│   ├── Add to cart button
+│   └── Related products
+├── /cart (Cart Page)
+│   ├── Cart items list
+│   ├── Quantity adjustment
+│   ├── Price summary
+│   └── Checkout button
+├── /store/:vendorId (VendorStoreFront)
+│   ├── Vendor profile
+│   └── Vendor's products grid
+├── /category/fashion (FashionPage)
+│   └── Fashion category products
+├── /category/electronics (ElectronicsPage)
+│   └── Electronics category products
+├── /login (Login)
+│   └── Email/password login form
+└── /register (Register)
+    └── Registration form with role selection
+
+CUSTOMER PROTECTED ROUTES:
+├── /account (CustomerDashboard)
+│   ├── Order history
+│   ├── Profile management
+│   ├── Address book
+│   ├── Wishlist
+│   └── Account settings
+
+ADMIN PROTECTED ROUTES:
+├── /admin (AdminLayout)
+│   ├── /admin/dashboard (AdminDashboard)
+│   ├── /admin/users (User management)
+│   ├── /admin/categories (CategoryManager)
+│   └── /admin/settings (Settings)
+
+VENDOR PROTECTED ROUTES:
+├── /vendor (VendorLayout)
+│   ├── /vendor/dashboard (VendorDashboard)
+│   │   ├── Sales statistics
+│   │   ├── Pending orders
+│   │   ├── Low stock alerts
+│   │   └── Recent orders
+│   ├── /vendor/add-product (AddProduct)
+│   │   ├── Product form with validation
+│   │   ├── Image upload
+│   │   └── Category selection
+│   ├── /vendor/products (Product listing)
+│   │   └── Edit/delete products
+│   └── /vendor/orders (Order management)
+│       └── Order status updates
+
+COMPONENT HIERARCHY:
+
+Navbar.jsx
+└── Navigation menu with:
+    ├── Logo/Brand
+    ├── Search bar
+    ├── Category links
+    ├── Cart icon (with badge showing item count)
+    ├── User menu (Login/Register or Profile/Logout)
+    └── Admin/Vendor links (if applicable user role)
+
+ProductCard.jsx / ProductCardLuxury.jsx
+├── Product image
+├── Product name
+├── Price
+├── Rating/Reviews
+├── Add to cart button
+└── Hover effects
+
+ProductGrid.jsx
+└── Grid layout of ProductCard components
+    ├── Pagination or infinite scroll
+    └── Filter/Sort controls
+
+FilterSidebar.jsx
+├── Category filter
+├── Price range slider
+├── Rating filter
+└── In stock filter
+
+Cart.jsx
+├── Cart item list
+│   └── Each item: image, name, price, quantity, remove
+├── Cart summary
+├── Continue shopping link
+└── Checkout button
+
+CartContext.jsx
+├── State: cart (array of items)
+├── Functions:
+│   ├── addToCart(product)
+│   ├── removeFromCart(productId)
+│   ├── updateQuantity(productId, quantity)
+│   ├── clearCart()
+│   └── cartTotal (computed)
+└── Provides global cart management
+
+VendorDashboard.jsx
+├── Dashboard metrics
+│   ├── Total sales
+│   ├── Pending orders count
+│   └── Low stock products count
+├── Recent orders table
+└── Quick actions
+
+AddProduct.jsx
+├── Form fields:
+│   ├── Product name
+│   ├── Description
+│   ├── Price
+│   ├── Stock quantity
+│   ├── Category dropdown
+│   └── Image upload
+├── Validation
+└── Submit handler
+
+AdminDashboard.jsx
+├── System statistics
+├── User management
+├── Platform analytics
+└── Recent activities
+
+UTILITY FILES:
+
+api/axios.js
+- Axios instance configuration
+- Base URL: http://localhost:5001/api
+- Default headers
+- Interceptors for adding JWT token
+- Error handling
+
+STYLING:
+- Tailwind CSS for utility-first styling
+- Custom CSS in App.css and index.css
+- Responsive design with mobile-first approach
+- Navigation and layout styling
+- Luxury brand color scheme (dark with gold accents)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8. STATE MANAGEMENT & CONTEXT
+═══════════════════════════════════════════════════════════════════════════════
+
+GLOBAL STATE:
+
+CartContext (Client-side State)
+├── State:
+│   ├── cart: Array<{ id, name, price, quantity, ...productDetails }>
+│   └── Total amount calculation
+├── Actions:
+│   ├── addToCart(product)
+│   ├── removeFromCart(productId)
+│   ├── updateQuantity(productId, newQuantity)
+│   └── clearCart()
+├── Persistence: Currently in-memory (can be enhanced with localStorage)
+└── Scope: Global (available to all components via useCart hook)
+
+USER AUTHENTICATION STATE MANAGEMENT:
+- Currently stored in localStorage/sessionStorage (token)
+- Can be enhanced to use Context API or Redux
+- Token persists across page refreshes
+- Auto-logout on token expiration
+
+LOCAL COMPONENT STATE:
+- Individual component useState for:
+  ├── Form input values
+  ├── Loading states
+  ├── Modal visibility
+  ├── Filter selections
+  └── UI toggles
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9. KEY FEATURES IMPLEMENTED
+═══════════════════════════════════════════════════════════════════════════════
+
+AUTHENTICATION & AUTHORIZATION:
+✓ User registration (all roles)
+✓ User login with JWT
+✓ Password hashing with bcryptjs
+✓ Role-based access control (RBAC)
+✓ Protected routes with ProtectedRoute component
+✓ JWT token validation middleware
+✓ Admin approval workflow for vendors
+
+PRODUCT MANAGEMENT:
+✓ Create products (Vendor)
+✓ Edit products (Vendor)
+✓ Delete products (Vendor)
+✓ Upload product images (Multer)
+✓ Product categorization
+✓ Stock quantity tracking
+✓ Product search functionality
+✓ Product filtering (price, category, etc.)
+✓ Product details page
+
+ADMIN FUNCTIONALITY:
+✓ User management dashboard
+✓ Vendor approval system
+✓ Category management (CRUD)
+✓ System settings management
+✓ Platform analytics/statistics
+
+VENDOR FEATURES:
+✓ Vendor profile creation
+✓ Store customization (name, logo, description)
+✓ Product listing and management
+✓ Sales dashboard with metrics
+✓ Order management (view and update status)
+✓ Inventory tracking (low stock alerts)
+✓ Vendor-specific analytics
+
+CUSTOMER FEATURES:
+✓ Product browsing
+✓ Advanced search and filtering
+✓ Add to cart functionality
+✓ Shopping cart management
+✓ Checkout process
+✓ Order placement
+✓ Order history viewing
+✓ Product reviews and ratings
+✓ Vendor storefront viewing
+
+MULTI-VENDOR ORDER SYSTEM:
+✓ Main orders for customers
+✓ Sub-orders breakdown per vendor
+✓ Order item tracking with vendor association
+✓ Automatic sub-order creation on checkout
+✓ Per-vendor order status management
+
+REVIEW SYSTEM:
+✓ Leave product reviews
+✓ 1-5 star rating system
+✓ Review comments
+✓ View reviews on product detail page
+✓ Admin moderation capability
+
+E-COMMERCE FEATURES:
+✓ Shopping cart (global state)
+✓ Product recommendations
+✓ Category editorial/showcase pages
+✓ Hero carousel for featured products
+✓ Luxury brand aesthetic
+✓ Responsive design
+
+
+═══════════════════════════════════════════════════════════════════════════════
+10. FILE UPLOAD SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+IMAGE UPLOAD METHOD: Multer (Express middleware)
+
+CONFIGURATION:
+├── Storage: Disk storage (local filesystem)
+├── Upload directory: /server/uploads/
+├── Filename: Timestamp + original extension
+│   Example: 1634567890123.jpg
+├── Supported formats: All image types
+└── Max file size: Default Multer size (typically 100MB)
+
+UPLOAD ROUTES:
+├── Product image: POST /api/products/:id/upload
+├── Vendor logo: POST /api/vendor/profile/upload-logo
+└── Response: { imageUrl: "/uploads/1634567890123.jpg" }
+
+SERVING UPLOADED FILES:
+- Static file middleware: app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+- Access URL: http://localhost:5001/uploads/{filename}
+- Used in: Product cards, vendor profiles, Admin dashboard
+
+ENHANCEMENT OPPORTUNITIES:
+- Cloud storage (AWS S3, Firebase Storage)
+- Image optimization/compression
+- Minimum/maximum dimension validation
+- File size validation
+- Multiple image support for products
+
+
+═══════════════════════════════════════════════════════════════════════════════
+11. ERROR HANDLING & VALIDATION
+═══════════════════════════════════════════════════════════════════════════════
+
+BACKEND VALIDATION:
+
+Authentication:
+- Email format validation
+- Password strength requirements (can be enhanced)
+- Unique email constraint
+- Role validation against allowed values
+
+Product Management:
+- Required field validation (name, price, vendor_id)
+- Price >= 0 constraint
+- Stock quantity >= 0 constraint
+- Category must exist
+
+Orders:
+- Valid product IDs must exist
+- Sufficient stock checking
+- Customer must be authenticated
+- Vendor items grouped automatically
+
+Database Constraints:
+- Foreign key relationships enforced
+- UNIQUE constraints (email)
+- CHECK constraints (price >= 0, rating 1-5)
+- NOT NULL constraints on required fields
+
+ERROR RESPONSES:
+- 400 Bad Request: Invalid input data
+- 401 Unauthorized: Missing or invalid JWT token
+- 403 Forbidden: Insufficient permissions
+- 404 Not Found: Resource doesn't exist
+- 500 Internal Server Error: Unexpected server issues
+
+FRONTEND VALIDATION:
+
+Form Validation:
+- Email format (regex pattern)
+- Password confirmation matching
+- Required field checking
+- Min/max length validation
+
+User Feedback:
+- Error messages displayed in UI
+- Loading states during API calls
+- Success notifications on actions
+- Form field validation feedback
+
+
+═══════════════════════════════════════════════════════════════════════════════
+12. SETUP & INSTALLATION GUIDE
+═══════════════════════════════════════════════════════════════════════════════
+
+PREREQUISITES:
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- PostgreSQL (v8 or higher)
+- Git
+
+ENVIRONMENT SETUP:
+
+1. CREATE DATABASE:
+   a) Open PostgreSQL command line
+   b) CREATE DATABASE evershop;
+   c) Connect to database: \c evershop
+   d) Import schema: \i server/schema.sql (from project directory)
+   
+   OR manually run server/setup_db.js
+
+2. ENVIRONMENT VARIABLES:
+   Create /server/.env file with:
+   ```
+   PORT=5001
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=your_postgres_user
+   DB_PASSWORD=your_postgres_password
+   DB_NAME=evershop
+   JWT_SECRET=your_very_secure_secret_key_here
+   NODE_ENV=development
+   ```
+
+3. INSTALL DEPENDENCIES:
+   
+   Root level:
+   $ npm install
+   
+   Client:
+   $ cd client
+   $ npm install
+   
+   Server:
+   $ cd server
+   $ npm install
+
+4. SEED DATABASE (Optional):
+   $ cd server
+   $ node seed.js
+   
+   This populates initial categories and test data
+
+5. START DEVELOPMENT SERVERS:
+   
+   Option A - From root (runs both concurrently):
+   $ npm run dev
+   
+   Option B - Separately:
+   Terminal 1:
+   $ npm run server
+   
+   Terminal 2:
+   $ npm run client
+
+6. ACCESS APPLICATION:
+   Frontend: http://localhost:5173 (Vite dev server)
+   API: http://localhost:5001/api/
+
+TEST CREDENTIALS (if seed data exists):
+   Admin: admin@test.com / password123
+   Vendor: vendor@test.com / password123
+   Customer: customer@test.com / password123
+
+
+═══════════════════════════════════════════════════════════════════════════════
+13. DEVELOPMENT WORKFLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+DEVELOPMENT COMMANDS:
+
+Frontend (from /client):
+├── npm run dev          # Start dev server with HMR
+├── npm run build        # Build for production
+├── npm run lint         # Run ESLint checks
+└── npm run preview      # Preview production build locally
+
+Backend (from /server):
+├── npm start            # Start server (production mode)
+├── npm run dev          # Start with Nodemon (auto-restart on file changes)
+└── node seed.js         # Populate database
+
+Root:
+├── npm run dev          # Run both client and server concurrently
+├── npm run server       # Run only backend
+└── npm run client       # Run only frontend
+
+BUILD PROCESS:
+
+Frontend Build:
+1. Vite bundles React components
+2. Tailwind CSS is processed and purged
+3. Output: /client/dist/
+4. Optimized for production
+
+Backend Deployment:
+1. No build step needed (Node.js runs directly)
+2. Ensure .env file is present on server
+3. Install dependencies: npm install --production
+4. Start: npm start
+
+DEVELOPMENT BEST PRACTICES:
+- Use npm run dev for active development
+- Check console for errors (both frontend and backend)
+- Use DevTools to debug React components
+- Test API endpoints with Postman/Insomnia
+- Keep .env file secure (never commit to git)
+- Run ESLint before committing: npm run lint
+
+
+═══════════════════════════════════════════════════════════════════════════════
+14. DEPLOYMENT NOTES
+═══════════════════════════════════════════════════════════════════════════════
+
+PRODUCTION CHECKLIST:
+
+Frontend:
+□ Build optimized bundle: npm run build from /client
+□ Set production API URL (update axios baseURL)
+□ Enable HTTPS/SSL
+□ Deploy /client/dist to static hosting (Vercel, Netlify, AWS S3)
+□ Set up CDN for static assets
+□ Enable gzip compression
+□ Cache-bust static files with hash names (Vite does this)
+
+Backend:
+□ Set NODE_ENV=production
+□ Use production PostgreSQL database (managed service recommended)
+□ Implement proper error logging
+□ Set secure JWT_SECRET (use strong random value)
+□ Enable HTTPS for API endpoints
+□ Implement API rate limiting
+□ Set up CORS properly for production domain
+□ Use environment-specific configurations
+□ Implement database backups
+□ Monitor server performance
+
+Database:
+□ Regular backups (daily recommended)
+□ Monitor query performance
+□ Implement indexes on frequently queried columns
+□ Use connection pooling
+□ Set up replication for redundancy
+□ Regular maintenance tasks (VACUUM, ANALYZE)
+
+Security:
+□ Implement HTTPS everywhere
+□ Use secure headers (HSTS, CSP, X-Frame-Options)
+□ SQL injection prevention (parameterized queries - already implemented)
+□ XSS protection (React escapes by default)
+□ CSRF tokens for state-changing operations
+□ Rate limiting on auth endpoints
+□ Password reset functionality
+□ Two-factor authentication (optional enhancement)
+□ Audit logging for admin actions
+□ Regular security updates for dependencies
+
+
+═══════════════════════════════════════════════════════════════════════════════
+15. KNOWN ISSUES & IMPROVEMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+CURRENT LIMITATIONS:
+1. Cart persistence: Currently in-memory, resets on page refresh
+   FIX: Implement localStorage or session storage
+   
+2. Image upload: Local filesystem only
+   FIX: Migrate to cloud storage (AWS S3, Firebase)
+   
+3. Email notifications: Not implemented
+   FIX: Add nodemailer for order confirmations, shipping updates
+   
+4. Payment processing: Not implemented
+   FIX: Integrate Stripe, PayPal, or similar payment gateway
+   
+5. Search: Basic text search only
+   FIX: Implement Elasticsearch for advanced full-text search
+   
+6. User profile: Limited customization
+   FIX: Add more profile fields (address, phone, preferences)
+   
+7. Analytics: Basic dashboard only
+   FIX: Advanced analytics with charts, trends, exports
+   
+8. Wishlist: Mentioned but not fully implemented
+   FIX: Complete wishlist functionality
+   
+9. API documentation: Missing Swagger/OpenAPI docs
+   FIX: Add Swagger UI for API documentation
+   
+10. Testing: No test suite implemented
+    FIX: Add Jest tests for frontend, Mocha/Chai for backend
+
+PERFORMANCE IMPROVEMENTS:
+- Implement database query optimization
+- Add caching layer (Redis)
+- Lazy load images
+- Code splitting for React components
+- Database connection pooling monitoring
+- API response pagination
+- Implement CDN for static assets
+
+SCALABILITY IMPROVEMENTS:
+- Horizontal scaling for backend
+- Load balancing
+- Microservices architecture (future)
+- Message queue for background jobs
+- Implement async job processing
+
+
+═══════════════════════════════════════════════════════════════════════════════
+16. COMMON TASKS & HOW-TOS
+═══════════════════════════════════════════════════════════════════════════════
+
+HOW TO ADD A NEW PRODUCT CATEGORY:
+
+1. Backend - Add to Database:
+   INSERT INTO categories (name, parent_id) 
+   VALUES ('Category Name', NULL);
+
+2. Create Category Component:
+   Duplicate /client/src/components/Customer/CategoryPages/FashionPage.jsx
+   Update category ID and product filtering
+
+3. Add Route in App.jsx:
+   <Route path="/category/newcategory" element={<><Navbar /><NewCategoryPage /><Footer /></>} />
+
+4. Update Navbar Links:
+   Add link to new category in Navbar.jsx
+
+
+HOW TO ADD NEW ADMIN SETTINGS:
+
+1. Create Settings Table Entry:
+   INSERT INTO system_settings (key, value) 
+   VALUES ('setting_name', 'default_value');
+
+2. Create Admin Setting Component:
+   Create new component in /client/src/components/Admin/
+
+3. Add API Route:
+   Add endpoint in /server/routes/admin.js for updating
+
+4. Wire to Admin Dashboard:
+   Add component to AdminLayout.jsx routing
+
+
+HOW TO IMPLEMENT PAYMENT GATEWAY:
+
+1. Choose Provider:
+   Recommended: Stripe, PayPal
+
+2. Install SDK:
+   npm install @stripe/react-stripe-js @stripe/stripe-js
+
+3. Create Payment Component:
+   /client/src/components/Checkout/PaymentForm.jsx
+
+4. Backend Integration:
+   Add /server/routes/payments.js with payment intent creation
+
+5. Update Checkout Flow:
+   Integrate payment processing in cart checkout
+
+6. Handle Webhooks:
+   Set up Stripe webhook endpoint for payment confirmation
+
+
+HOW TO ADD EMAIL NOTIFICATIONS:
+
+1. Install Nodemailer:
+   npm install nodemailer
+
+2. Create Email Service:
+   /server/services/emailService.js
+
+3. Add Email Templates:
+   /server/templates/orderConfirmation.html
+   /server/templates/shippingNotification.html
+
+4. Trigger Emails:
+   Call email service after key events:
+   - Order confirmation
+   - Order shipment
+   - Order delivery
+   - Review posted (optional)
+   - User registration (optional)
+
+
+HOW TO ADD NEW PRODUCT FIELD:
+
+1. Database Migration:
+   ALTER TABLE products ADD COLUMN new_field VARCHAR(255);
+
+2. Backend Validation:
+   Update validation in /server/routes/products.js
+
+3. Frontend Form:
+   Update /client/src/components/Vendor/AddProduct.jsx
+
+4. Product Display:
+   Update /client/src/components/Customer/ProductDetailLuxury.jsx
+
+5. Product Card:
+   Update /client/src/components/Customer/ProductCard.jsx if needed
+
+
+═══════════════════════════════════════════════════════════════════════════════
+17. TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+COMMON ERRORS:
+
+Error: "Cannot find module 'cors'"
+Solution: npm install cors (in server directory)
+
+Error: "Port 5001 is already in use"
+Solution: 
+- Kill process: lsof -i :5001 (Mac/Linux) or netstat -ano | findstr 5001 (Windows)
+- Change PORT in .env
+- Use different terminal
+
+Error: "Database connection error"
+Solution:
+- Check PostgreSQL is running
+- Verify database credentials in .env
+- Ensure database exists: createdb evershop
+- Verify schema is loaded: \dt (in psql)
+
+Error: "CORS error from frontend"
+Solution:
+- Check CORS configuration in server/index.js
+- Verify frontend URL matches origin setting
+- Hard refresh browser (Ctrl+Shift+R)
+
+Error: "JWT token is invalid"
+Solution:
+- Check token hasn't expired
+- Verify JWT_SECRET matches between login and validation
+- Clear localStorage and re-login
+
+Error: "Image upload fails"
+Solution:
+- Check /server/uploads/ directory exists
+- Verify file permissions on uploads folder
+- Check Multer configuration
+- File size not exceeding limit
+
+Error: "Product not appearing after upload"
+Solution:
+- Check stock_quantity > 0
+- Verify product category exists
+- Check vendor_id is correct
+- Refresh page or check database directly
+
+Error: "Can't login with registered account"
+Solution:
+- Verify email spelling
+- Confirm password is correct
+- Check user role in database
+- Vendor accounts may need admin approval
+
+Error: "Admin dashboard shows no data"
+Solution:
+- Seed database: node server/seed.js
+- Check user role is 'Administrator'
+- Verify database has data: SELECT * FROM users;
+
+
+═══════════════════════════════════════════════════════════════════════════════
+18. RECOMMENDED UPDATES & ENHANCEMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+PRIORITY 1 (CRITICAL):
+1. Implement payment processing (Stripe integration)
+2. Complete checkout flow
+3. Order tracking and notifications
+4. Cart persistence (localStorage)
+5. Security audit and hardening
+
+PRIORITY 2 (HIGH):
+1. Email notifications system
+2. Advanced search with filters
+3. Product recommendations
+4. Wishlist implementation
+5. User profile customization
+6. Admin dashboard improvements
+
+PRIORITY 3 (MEDIUM):
+1. API documentation (Swagger)
+2. Unit and integration tests
+3. Performance optimization
+4. Cloud storage integration
+5. Advanced analytics
+6. Two-factor authentication
+
+PRIORITY 4 (LOW):
+1. Social media integration
+2. Product comparison
+3. Mobile app (React Native)
+4. Multi-language support
+5. A/B testing framework
+6. Advanced inventory management
+
+RECOMMENDED LIBRARIES TO ADD:
+- Redux or Zustand (better state management)
+- React Query (API data management)
+- React Hook Form (form management)
+- Zod or Yup (schema validation)
+- Winston (logging)
+- Jest & React Testing Library (testing)
+- TypeScript (type safety)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+19. PROJECT METRICS & STATISTICS
+═══════════════════════════════════════════════════════════════════════════════
+
+CODE ORGANIZATION:
+- Frontend Components: 20+
+- Backend Routes: 7 main route files
+- Database Tables: 8 tables
+- API Endpoints: 40+ endpoints
+- Total Lines of Code: ~5000+ (approx)
+
+COMPONENT BREAKDOWN:
+- Admin Components: 4
+- Auth Components: 3
+- Common Components: 2
+- Customer Components: 16
+- Vendor Components: 3
+
+DATABASE:
+- Tables: 8
+- Relationships: 12+ foreign keys
+- Indexes: 5
+- Enums: 1 (user_role)
+
+API ROUTES:
+- Auth: 2 endpoints
+- Products: 5+ endpoints
+- Vendor: 5+ endpoints
+- Orders: 5+ endpoints
+- Admin: 8+ endpoints
+- Reviews: 4+ endpoints
+- Storefront: 4+ endpoints
+- Social: 2+ endpoints
+
+
+═══════════════════════════════════════════════════════════════════════════════
+20. PROJECT SUMMARY & NEXT STEPS
+═══════════════════════════════════════════════════════════════════════════════
+
+PROJECT SUMMARY:
+EverShop is a fully-functional multi-vendor e-commerce platform built with React 
+and Express.js. It provides a complete marketplace experience with separate interfaces 
+for customers, vendors, and administrators. The project demonstrates modern web 
+development practices including authentication, authorization, state management, 
+and responsive UI design.
+
+KEY ACHIEVEMENTS:
+✓ Multi-role authentication system
+✓ Complete product catalog management
+✓ Multi-vendor order system with sub-orders
+✓ Shopping cart functionality
+✓ Admin dashboard for system management
+✓ Vendor analytics and order tracking
+✓ Image upload with Multer
+✓ Responsive luxury brand design
+✓ Protected routes with RBAC
+
+NEXT IMMEDIATE STEPS:
+
+1. VERIFICATION:
+   - Set up PostgreSQL database
+   - Run seed script for sample data
+   - Start development servers
+   - Test user registration and login
+   - Verify all routes are accessible
+
+2. ENHANCEMENT:
+   - Implement complete checkout flow
+   - Add payment processing
+   - Set up email notifications
+   - Implement cart persistence
+   - Add advanced search
+
+3. TESTING:
+   - Manual testing of all flows
+   - API testing with Postman
+   - Security review
+   - Performance testing
+   - Cross-browser compatibility
+
+4. OPTIMIZATION:
+   - Code cleanup
+   - Performance profiling
+   - Database query optimization
+   - Frontend bundle optimization
+   - Security hardening
+
+5. DOCUMENTATION:
+   - API documentation with Swagger
+   - Component storybook
+   - User guide/manual
+   - Admin guide
+   - Deployment guide
+
+This documentation should serve as the complete foundation for all 
+future updates, maintenance, and feature additions to the EverShop project.
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF PROJECT DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════

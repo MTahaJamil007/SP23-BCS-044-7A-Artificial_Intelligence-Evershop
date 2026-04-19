@@ -1,0 +1,17 @@
+{
+  "name": "evershop-root",
+  "version": "1.0.0",
+  "description": "Root script to run EverShop client and server concurrently",
+  "type": "commonjs",
+  "scripts": {
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
