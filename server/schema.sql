@@ -1,5 +1,6 @@
 -- Enable UUID if needed
 -- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- 1. Users Table
 -- Handle Enum existence
@@ -42,6 +43,9 @@ CREATE TABLE IF NOT EXISTS products (
     stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
     image_url VARCHAR(255),
     category VARCHAR(100),
+    embedding vector,
+    embedding_model VARCHAR(100),
+    embedding_updated_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

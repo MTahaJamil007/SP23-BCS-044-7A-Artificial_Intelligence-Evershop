@@ -800,6 +800,70 @@ E-COMMERCE FEATURES:
 ✓ Responsive design
 
 
+================================================================================
+APPENDIX — EverShop AI Architecture: Phase 1 (Base System)
+================================================================================
+
+Project Motto: The Thinking Partner
+
+Overview:
+This phase defines the base system for EverShop AI: a lightweight, split architecture
+for local Ubuntu development that supports multi-vendor operations and prepares the
+platform for upcoming AI search and assistant features.
+
+Environment & Ports:
+- Frontend: React + Vite — port 5173
+- Backend: Node.js v20 + Express — port 5001
+- Database: PostgreSQL 14 — port 5432
+
+Local Access Points:
+- Frontend UI: http://localhost:5173 — Start with `npm run dev` in `client/`
+- Backend API: http://localhost:5001 — Start with `npm start` in `server/`
+- Database: localhost:5432 (runs as local service)
+
+Database Credentials (local dev):
+- Database Name: evershop
+- User Role: evershop
+- Password: admin123
+
+System Users & Authentication (raw unhashed credentials for local testing):
+- System Admin (Dashboard Only): admin@test.com / admin123
+- Vendor 1 — The Modern Connoisseur: vendor@test.com / vendor123
+- Vendor 2 — Tech Haven: tech@test.com / vendor123
+- Vendor 3 — The Wardrobe: fashion@test.com / vendor123
+- Vendor 4 — Luxe Gems: jewel@test.com / vendor123
+
+Security Note: Passwords in the database are hashed with bcrypt; these raw
+credentials are provided only so developers can log into the UI during local testing.
+
+Data Sources & Inventory:
+- FakeStore API: baseline seed data
+- DummyJSON API: bulk inventory ingestion (used to pull 100+ complex items)
+- `bulk-inventory.js` maps incoming items to vendor storefronts by category tags
+   (e.g., laptops → Tech Haven).
+
+Components & Scripts Introduced in Phase 1:
+- `schema.sql`: rebuilt `users`, `products`, and `vendor_profiles` tables with strict
+   relational constraints and indexes.
+- `seed-db.js`: injects exact-schema data to avoid routing errors and to establish
+   ownership rules across entities.
+- `seed-multi-vendors.js`: clones encrypted password hashes to create multiple,
+   localized vendor accounts with approved storefront profiles.
+- `bulk-inventory.js`: imports inventory from DummyJSON and programmatically routes
+   complex items to the correct vendor based on category tags.
+
+How to run (quick):
+1. Ensure PostgreSQL is running locally and create the `evershop` DB or use the
+    provided setup scripts.
+2. From `server/`: `npm install` then `npm start` (ensure `.env` contains DB creds).
+3. From `client/`: `npm install` then `npm run dev` to start the frontend.
+
+Remarks:
+- Keep secrets (API keys, production DB passwords) out of the repo — use `server/.env`.
+- Use the seed scripts to reproduce a multi-vendor dataset for testing AI search models.
+
+
+
 ═══════════════════════════════════════════════════════════════════════════════
 10. FILE UPLOAD SYSTEM
 ═══════════════════════════════════════════════════════════════════════════════
