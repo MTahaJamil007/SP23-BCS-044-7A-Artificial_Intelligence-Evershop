@@ -19,6 +19,16 @@ const MAX_TOOL_HOPS = 3;
 const SESSION_IDLE_MINUTES = 30;
 const PRODUCT_TOKEN = /\[product:(\d+)\]/g;
 
+const POLICY_TOPICS = {
+  returns: /\breturn|refund|exchange|send back\b/i,
+  shipping: /\bship|delivery|deliver|arrive|how long\b/i,
+  warranty: /\bwarrant|guarantee|broken|defective\b/i,
+  payment: /\bpay|payment|credit card|visa|mastercard|paypal|klarna|crypto\b/i,
+  contact: /\bcontact|support|reach|email|customer service\b/i,
+};
+
+const PRODUCT_INTENT = /\b(find|show|recommend|suggest|looking for|need a|searching for|search|browse|i want|do you have|got any|under\s*\$?\d+)\b|\b(shoes?|laptop|jacket|shirt|watch|bracelet|monitor|phone|earbud|speaker|sneaker|t-?shirt|backpack|drive|ssd|airpod|echo|macbook)\b/i;
+
 // ─── Session helpers ────────────────────────────────────────────────────────
 
 async function loadOrCreateSession(sessionId, userId = null) {
@@ -72,6 +82,72 @@ async function runTool(name, args) {
   }
 }
 
+// ─── Intent detection (for fallback when LLM is unavailable) ────────────────
+
+function detectIntent(message) {
+  if (!message) return { type: 'unknown' };
+  // Off-topic refusal patterns
+  if (/\b(fibonacci|recipe|joke|weather|news|code|python|javascript|sql|capital of|meaning of life)\b/i.test(message)) {
+    return { type: 'offtopic' };
+  }
+  // Policy intent
+  for (const [topic, pattern] of Object.entries(POLICY_TOPICS)) {
+    if (pattern.test(message)) return { type: 'policy', topic };
+  }
+  // Product search intent
+  if (PRODUCT_INTENT.test(message)) {
+    return { type: 'search', query: message };
+  }
+  return { type: 'unknown' };
+}
+
+// ─── Deterministic fallback handler ─────────────────────────────────────────
+// Called when the LLM is rate-limited (429) or otherwise unavailable.
+// Handles the most common intents without burning Gemini quota.
+
+async function fallbackHandle({ session, message }) {
+  const intent = detectIntent(message);
+  let reply;
+
+  if (intent.type === 'policy') {
+    const result = await TOOLS.getPolicies.run({ topic: intent.topic });
+    reply = `${result.content}\n\n_AI concierge is on quota cooldown — answered from stored policies._`;
+  } else if (intent.type === 'search') {
+    const result = await TOOLS.searchProducts.run({ query: intent.query });
+    if (result.products.length === 0) {
+      reply = `I couldn't find any matching products. Try a different search term.\n\n_AI concierge is on quota cooldown — using basic search._`;
+    } else {
+      const lines = result.products.slice(0, 5).map(
+        (p) => `- **${p.name}** — $${p.price.toFixed(2)} [product:${p.id}]`
+      );
+      reply = `Here's what I found:\n\n${lines.join('\n')}\n\n_AI concierge is on quota cooldown — answered with a direct search instead of a full conversation._`;
+    }
+  } else if (intent.type === 'offtopic') {
+    reply = `I'm just the EverShop shopping assistant — I can help you find products or answer questions about shipping, returns, warranty, payment, or contact info.`;
+  } else {
+    reply =
+      `I'm on quota cooldown so I can't carry a full conversation right now. I can still help with:\n\n` +
+      `- Searching for products (try "find me a laptop under $1500")\n` +
+      `- Store policies (try "what's your return policy?" / "do you ship internationally?")\n\n` +
+      `_Full AI assistant resumes when daily quota resets._`;
+  }
+
+  const newHistory = [
+    ...session.messages,
+    { role: 'user', parts: [{ text: message }] },
+    { role: 'model', parts: [{ text: reply }] },
+  ];
+  await saveSession(session.id, newHistory);
+
+  return {
+    reply,
+    sources: extractSources(reply),
+    session_id: session.id,
+    tokens_used: 0,
+    degraded: true,
+  };
+}
+
 // ─── Citation extraction ────────────────────────────────────────────────────
 
 function extractSources(text) {
@@ -90,6 +166,11 @@ function extractSources(text) {
  * @param {string} input.message - user's message
  * @returns {Promise<{ reply, sources, session_id, tokens_used }>}
  */
+function isQuotaError(err) {
+  const m = err?.message || '';
+  return m.includes('RESOURCE_EXHAUSTED') || m.includes('"code":429') || m.includes('429');
+}
+
 async function handleMessage({ sessionId, userId, message }) {
   const session = await loadOrCreateSession(sessionId, userId);
 
@@ -100,11 +181,22 @@ async function handleMessage({ sessionId, userId, message }) {
   let finalText = '';
 
   for (let hop = 0; hop < MAX_TOOL_HOPS + 1; hop++) {
-    const result = await chatCompletion({
-      messages: history,
-      tools: TOOL_DECLARATIONS,
-      systemInstruction: SYSTEM_PROMPT,
-    });
+    let result;
+    try {
+      result = await chatCompletion({
+        messages: history,
+        tools: TOOL_DECLARATIONS,
+        systemInstruction: SYSTEM_PROMPT,
+      });
+    } catch (err) {
+      // Graceful degradation: when Gemini is over quota, route through the
+      // deterministic intent handler instead of returning a 503.
+      if (isQuotaError(err)) {
+        logger.warn({ err: err.message }, 'chat orchestrator: LLM quota exhausted — using deterministic fallback');
+        return fallbackHandle({ session, message });
+      }
+      throw err;
+    }
     if (result.usageMetadata?.totalTokenCount) {
       totalTokens += result.usageMetadata.totalTokenCount;
     }
@@ -121,16 +213,21 @@ async function handleMessage({ sessionId, userId, message }) {
     // We hit the hop cap — let the model finish without more tool calls
     if (hop === MAX_TOOL_HOPS) {
       logger.warn({ sessionId: session.id, hops: hop }, 'chat: max tool-hops reached, forcing termination');
-      // Append a synthetic note so the model knows to wrap up. (Gemini handles this gracefully.)
       history.push({
         role: 'user',
         parts: [{ text: '(Tool budget reached. Please summarise what you have so far without further tool calls.)' }],
       });
-      const finalResult = await chatCompletion({
-        messages: history,
-        tools: TOOL_DECLARATIONS,
-        systemInstruction: SYSTEM_PROMPT,
-      });
+      let finalResult;
+      try {
+        finalResult = await chatCompletion({
+          messages: history,
+          tools: TOOL_DECLARATIONS,
+          systemInstruction: SYSTEM_PROMPT,
+        });
+      } catch (err) {
+        if (isQuotaError(err)) return fallbackHandle({ session, message });
+        throw err;
+      }
       if (finalResult.usageMetadata?.totalTokenCount) totalTokens += finalResult.usageMetadata.totalTokenCount;
       history.push(finalResult.rawContent || { role: 'model', parts: [{ text: finalResult.text }] });
       finalText = finalResult.text;
@@ -155,6 +252,7 @@ async function handleMessage({ sessionId, userId, message }) {
     sources: extractSources(finalText),
     session_id: session.id,
     tokens_used: totalTokens,
+    degraded: false,
   };
 }
 

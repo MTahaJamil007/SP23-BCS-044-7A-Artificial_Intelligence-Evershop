@@ -3,14 +3,21 @@ const router = express.Router();
 const db = require('../config/db');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Configure Multer for image upload
+// Resolve uploads dir relative to this server module, NOT cwd. Then ensure it
+// exists at boot — Multer doesn't auto-create destination directories, and the
+// old relative 'uploads/' path 500'd when the server was started from any
+// directory other than server/.
+const UPLOADS_DIR = path.resolve(__dirname, '..', 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, UPLOADS_DIR);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Append extension
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 

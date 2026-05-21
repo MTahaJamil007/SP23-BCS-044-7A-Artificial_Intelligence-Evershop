@@ -82,11 +82,15 @@ router.get('/orders', auth, async (req, res) => {
 
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Configure Multer
+// Resolve uploads dir relative to this server module (not cwd) and ensure it exists.
+const UPLOADS_DIR = path.resolve(__dirname, '..', 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, UPLOADS_DIR);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));

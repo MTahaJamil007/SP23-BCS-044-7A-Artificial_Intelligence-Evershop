@@ -59,16 +59,12 @@ router.post('/', aiRateLimit, aiBudgetGuard, aiUsageLogger, async (req, res) => 
       reply: result.reply,
       sources: result.sources,
       session_id: result.session_id,
+      degraded: !!result.degraded,
     });
   } catch (err) {
     logger.error({ err: err.message, stack: err.stack }, 'chat orchestrator failed');
-    // Surface common Gemini quota error in a user-friendly way
-    if (err.message && err.message.includes('RESOURCE_EXHAUSTED')) {
-      return res.status(503).json({
-        error: 'AI assistant is rate-limited right now. Please try again in a minute.',
-        degraded: true,
-      });
-    }
+    // The orchestrator handles RESOURCE_EXHAUSTED internally via the
+    // deterministic fallback, so any error reaching here is a real bug.
     return res.status(500).json({ error: 'Chat request failed' });
   }
 });

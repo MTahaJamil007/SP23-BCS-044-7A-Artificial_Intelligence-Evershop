@@ -59,6 +59,13 @@ const AnalyticsAssistant = () => {
 
     const rows = result?.data?.rows ?? [];
     const columns = rows[0] ? Object.keys(rows[0]) : [];
+    // A response is "useful" when a tool ran AND returned rows. Otherwise we want
+    // to surface the textual summary/help (e.g. "I can answer about: low stock…")
+    // instead of a misleading "No data returned" message.
+    const hasRows = rows.length > 0;
+    const isToolMiss = result && result.ok && !result.tool;
+    const isToolButNoRows = result && result.ok && result.tool && !hasRows;
+    const isServerError = result && result.ok === false;
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
@@ -109,8 +116,13 @@ const AnalyticsAssistant = () => {
             {result && (
                 <div className="mt-3">
                     {result.tool && (
-                        <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">
-                            via {result.tool}
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-400 mb-2">
+                            <span>via {result.tool}</span>
+                            {result.degraded && (
+                                <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded normal-case tracking-normal" title="LLM unavailable — used keyword routing instead">
+                                    fallback mode
+                                </span>
+                            )}
                         </div>
                     )}
                     {result.summary && (
@@ -118,7 +130,8 @@ const AnalyticsAssistant = () => {
                             {result.summary}
                         </p>
                     )}
-                    {rows.length > 0 ? (
+
+                    {hasRows && (
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs">
                                 <thead>
@@ -148,10 +161,24 @@ const AnalyticsAssistant = () => {
                                 </p>
                             )}
                         </div>
-                    ) : (
-                        !errMsg && (
-                            <p className="text-sm text-gray-500 italic">No data returned.</p>
-                        )
+                    )}
+
+                    {isToolButNoRows && (
+                        <p className="text-sm text-gray-500 bg-[#F8F7F4] rounded-md px-3 py-2 border border-gray-100">
+                            No products in your catalog match these criteria.
+                        </p>
+                    )}
+
+                    {isToolMiss && !result.summary && (
+                        <p className="text-sm text-gray-500 italic">
+                            I can answer questions about: low stock, top sellers, revenue by category, order trends, or products that never sold.
+                        </p>
+                    )}
+
+                    {isServerError && (
+                        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                            {result.message || result.error || 'Something went wrong.'}
+                        </p>
                     )}
                 </div>
             )}

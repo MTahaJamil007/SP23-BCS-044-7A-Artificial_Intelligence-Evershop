@@ -2,9 +2,13 @@
 
 Project Motto: The Thinking Partner
 
+## Overview
+
+EverShop is a multi-vendor e-commerce system augmented with AI-assisted customer and vendor workflows. This repository provides a split architecture (React client, Node/Express API, PostgreSQL) optimized for reproducible local Ubuntu development and evaluation.
+
 ## Phase 1 — Base System (EverShop AI Architecture)
 
-This repository contains a split architecture optimized for a lightweight local Ubuntu development environment.
+This phase establishes the foundational services, data model, and AI entry points required for storefront browsing, vendor management, and analytics augmentation.
 
 - Frontend: React + Vite (dev server: http://localhost:5173)
 - Backend: Node.js v20 + Express (API server: http://localhost:5001)
@@ -12,17 +16,7 @@ This repository contains a split architecture optimized for a lightweight local 
 
 ## Local Access & Run Commands
 
-- Frontend UI: http://localhost:5173
-	- Start: `npm run dev`
-	- Directory: `client/`
-
-- Backend API: http://localhost:5001
-	- Start: `npm start`
-	- Directory: `server/`
-
-- Database: `localhost:5432` (PostgreSQL running as local service)
-
-Run servers in separate terminals from project root:
+To reproduce the environment, start the API and UI in separate terminals from the project root:
 
 ```bash
 cd server
@@ -34,36 +28,41 @@ npm install
 npm run dev
 ```
 
-## Database (local development)
+Service endpoints:
+- Frontend UI: http://localhost:5173 (`client/`)
+- Backend API: http://localhost:5001 (`server/`)
+- Database: PostgreSQL at `localhost:5432`
+
+## Database (Local Development)
 
 - Database Name: `evershop`
 - User: `evershop`
 - Password: `admin123`
 - Engine: PostgreSQL 14 on port `5432`
 
-> The project includes `schema.sql` and seeding scripts under `server/` to build and populate the local DB.
+The project includes `schema.sql` and seeding scripts under `server/` to build and populate the local DB.
 
-## System Users (raw credentials for local development)
+## System Users (Local Development Credentials)
 
 - System Admin (Dashboard only)
-	- Email: `admin@test.com`
-	- Password: `admin123`
+  - Email: `admin@test.com`
+  - Password: `admin123`
 
 - Vendor 1 — The Modern Connoisseur
-	- Email: `vendor@test.com`
-	- Password: `vendor123`
+  - Email: `vendor@test.com`
+  - Password: `vendor123`
 
 - Vendor 2 — Tech Haven
-	- Email: `tech@test.com`
-	- Password: `vendor123`
+  - Email: `tech@test.com`
+  - Password: `vendor123`
 
 - Vendor 3 — The Wardrobe
-	- Email: `fashion@test.com`
-	- Password: `vendor123`
+  - Email: `fashion@test.com`
+  - Password: `vendor123`
 
 - Vendor 4 — Luxe Gems
-	- Email: `jewel@test.com`
-	- Password: `vendor123`
+  - Email: `jewel@test.com`
+  - Password: `vendor123`
 
 Passwords stored in the DB are hashed with `bcrypt` — the above are unhashed credentials for testing only.
 
@@ -71,7 +70,7 @@ Passwords stored in the DB are hashed with `bcrypt` — the above are unhashed c
 
 - Baseline: FakeStore API (lightweight seeded examples)
 - Bulk inventory: DummyJSON API (100+ complex items pulled via `bulk-inventory.js`)
-	- `bulk-inventory.js` routes items to vendors by category tags.
+  - `bulk-inventory.js` routes items to vendors by category tags.
 
 ## Key Scripts & Components (Phase 1)
 
@@ -82,7 +81,7 @@ Passwords stored in the DB are hashed with `bcrypt` — the above are unhashed c
 - `client/src/api/axios.js` — Axios instance for API calls
 - `client/src/context/CartContext.jsx` — Cart global state
 
-## Notes
+## Security and Secrets
 
 - All development secrets (e.g., `GEMINI_API_KEY`) should be placed in `server/.env` and not committed.
 - Use the provided seed scripts to fully populate the database for local testing of multi-vendor features.
@@ -106,3 +105,42 @@ npm run embed:products
 The script reads products from PostgreSQL, combines each product's name, description, and category, sends that text to Gemini embedding, and updates the product row with a pgvector embedding.
 
 See `PROJECT_DOCUMENTATION.txt` for an extended architecture overview and API details.
+
+## Visual Documentation (Hierarchical)
+
+### 1. Development Environment
+
+Figure 1. Local development workspace showing concurrent client and server processes.
+![Figure 1 — Local development workspace for concurrent UI/API runs.](images/01_system/dev-environment-vscode.png)
+
+### 2. Customer-Facing Storefront
+
+Figure 2. Home page hero and primary navigation for the storefront.
+![Figure 2 — Home hero and primary navigation.](images/02_storefront/home-hero.png)
+
+Figure 3. Product grid supporting catalog browsing and category context.
+![Figure 3 — Product grid with category context.](images/02_storefront/product-grid.png)
+
+Figure 4. AI concierge interface for guided product discovery.
+![Figure 4 — AI shopping assistant recommending items.](images/03_ai_assistant/concierge-chat.png)
+
+### 3. Vendor Operations
+
+#### 3.1 Product Authoring
+
+Figure 5. Add-product form capturing core attributes and specifications.
+![Figure 5 — Vendor add-product form.](images/04_vendor_management/add-product-form.png)
+
+Figure 6. AI-generated description populated into the product form.
+![Figure 6 — AI-generated product description.](images/04_vendor_management/add-product-ai-description.png)
+
+Figure 7. AI writing state indicating generation in progress.
+![Figure 7 — AI writing indicator during description generation.](images/04_vendor_management/add-product-ai-writing-state.png)
+
+#### 3.2 Vendor Analytics Assistant
+
+Figure 8. Prompt suggestions that accelerate common analytics queries.
+![Figure 8 — Analytics assistant prompt chips.](images/05_vendor_analytics/assistant-prompt.png)
+
+Figure 9. Analytics results table showing vendor-level insights.
+![Figure 9 — Analytics assistant results view.](images/05_vendor_analytics/assistant-results.png)

@@ -95,7 +95,13 @@ const AIAssistant = () => {
         try {
             const { data } = await aiChat({ session_id: sessionId, message: trimmed });
             if (data.session_id) setSessionId(data.session_id);
-            const botMsg = { role: 'assistant', content: data.reply, sources: data.sources || [], ts: Date.now() };
+            const botMsg = {
+                role: 'assistant',
+                content: data.reply,
+                sources: data.sources || [],
+                degraded: !!data.degraded,
+                ts: Date.now(),
+            };
             setMessages((prev) => [...prev, botMsg]);
         } catch (err) {
             const status = err.response?.status;
@@ -201,7 +207,14 @@ const AIAssistant = () => {
                                     {m.role === 'user' ? (
                                         <span>{m.content}</span>
                                     ) : (
-                                        renderMessageBody(m.content)
+                                        <>
+                                            {m.degraded && (
+                                                <div className="text-[9px] uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 inline-block px-1.5 py-0.5 rounded mb-1">
+                                                    fallback mode
+                                                </div>
+                                            )}
+                                            {renderMessageBody(m.content)}
+                                        </>
                                     )}
                                 </div>
                             </div>

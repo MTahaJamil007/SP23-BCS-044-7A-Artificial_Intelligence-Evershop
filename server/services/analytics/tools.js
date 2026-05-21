@@ -17,12 +17,13 @@ const TIMEFRAME_DAYS = { '7d': 7, '30d': 30, '90d': 90 };
 const getLowStockItems = {
   declaration: {
     name: 'getLowStockItems',
-    description: "Find the vendor's products with low or zero stock. Optionally filter by minimum price.",
+    description: "Find the vendor's products with low or zero stock. Optionally filter by price range.",
     parameters: {
       type: 'object',
       properties: {
         threshold: { type: 'integer', description: 'Maximum stock_quantity to include (e.g. 10 for "low stock")' },
         min_price: { type: 'number', description: 'Only include products priced at or above this amount' },
+        max_price: { type: 'number', description: 'Only include products priced at or below this amount' },
       },
       required: ['threshold'],
     },
@@ -30,17 +31,19 @@ const getLowStockItems = {
   paramsSchema: z.object({
     threshold: z.number().int().min(0).max(10000),
     min_price: z.number().min(0).max(1e6).nullable().optional(),
+    max_price: z.number().min(0).max(1e6).nullable().optional(),
   }),
-  async run({ threshold, min_price = null }, { vendor_id }) {
+  async run({ threshold, min_price = null, max_price = null }, { vendor_id }) {
     const { rows } = await db.query(
       `SELECT id, name, category, price, stock_quantity
          FROM products
         WHERE vendor_id = $1
           AND stock_quantity <= $2
           AND ($3::numeric IS NULL OR price >= $3)
+          AND ($4::numeric IS NULL OR price <= $4)
         ORDER BY stock_quantity ASC, price DESC
         LIMIT 25`,
-      [vendor_id, threshold, min_price]
+      [vendor_id, threshold, min_price, max_price]
     );
     return { count: rows.length, rows };
   },
