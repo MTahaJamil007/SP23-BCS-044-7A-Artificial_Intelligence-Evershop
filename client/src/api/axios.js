@@ -93,4 +93,35 @@ export const updateSetting = async (key, value) => {
     return await api.put('/admin/settings', { key, value });
 };
 
+// AI search — pass an AbortSignal to cancel in-flight requests when the user
+// types a newer query before this one returns.
+export const aiSearch = async (query, signal) => {
+    return await api.post('/ai/search', { query }, { signal });
+};
+
+// AI shopping-assistant chat
+export const aiChat = async ({ session_id, message }, signal) => {
+    return await api.post('/ai/chat', { session_id, message }, { signal });
+};
+
+// Single product fetch (used by inline product cards in the assistant)
+export const getProductById = async (id) => {
+    return await api.get(`/products/${id}`);
+};
+
+// Vendor analytics — natural-language question, tool-routed (NO text-to-SQL)
+export const askVendorAnalytics = async (question) => {
+    return await api.post('/ai/vendor/analytics', { question });
+};
+
+// Related products via vector similarity
+export const getRelatedProducts = async (productId) => {
+    return await api.get(`/ai/related/${productId}`);
+};
+
+// AI description generator (vendor-only)
+export const generateProductDescription = async (payload) => {
+    return await api.post('/ai/vendor/generate-description', payload);
+};
+
 export default api;

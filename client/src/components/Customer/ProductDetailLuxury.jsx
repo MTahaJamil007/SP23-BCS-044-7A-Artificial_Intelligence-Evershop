@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import RelatedProducts from './RelatedProducts';
 import { useCart } from '../../context/CartContext';
 import { 
     StarIcon, 
@@ -398,6 +399,7 @@ const ProductDetailLuxury = () => {
 
                 </div>
             </div>
+            <RelatedProducts productId={id} />
         </div>
     );
 };

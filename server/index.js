@@ -9,8 +9,13 @@ const PORT = process.env.PORT || 5001;
 
 // --- FIX 1: Allow Frontend (CORS) ---
 app.use(cors({
-    origin: 'http://localhost:5173', // Matches your React URL
-    credentials: true // Allows sending tokens/cookies
+    // Accept any localhost port in dev (Vite picks 5173, 5174, 5175 depending on availability).
+    origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        if (/^http:\/\/localhost:\d+$/.test(origin)) return cb(null, true);
+        return cb(new Error('CORS not allowed for origin: ' + origin));
+    },
+    credentials: true
 }));
 
 app.use(express.json());
@@ -31,6 +36,12 @@ app.use('/api/vendor', require('./routes/vendor'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/storefront', require('./routes/storefront'));
 app.use('/api/social', require('./routes/social'));
+app.use('/api/ai/health', require('./routes/ai/health'));
+app.use('/api/ai/search', require('./routes/ai/search'));
+app.use('/api/ai/chat', require('./routes/ai/chat'));
+app.use('/api/ai/vendor/analytics', require('./routes/ai/vendorAnalytics'));
+app.use('/api/ai/related', require('./routes/ai/related'));
+app.use('/api/ai/vendor/generate-description', require('./routes/ai/generateDescription'));
 
 // Test Route
 app.get('/', (req, res) => {

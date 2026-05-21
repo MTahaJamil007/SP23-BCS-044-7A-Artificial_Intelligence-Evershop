@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { addProduct } from '../../api/axios';
+import { addProduct, generateProductDescription } from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const AddProduct = () => {
     const navigate = useNavigate();
@@ -23,6 +24,8 @@ const AddProduct = () => {
     const [image, setImage] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [aiBusy, setAiBusy] = useState(false);
+    const [aiErr, setAiErr] = useState('');
 
     useEffect(() => {
         // Client-side role protection
@@ -54,6 +57,39 @@ const AddProduct = () => {
 
     const handleImageChange = (e) => {
         setImage(e.target.files[0]);
+    };
+
+    const handleGenerateDescription = async () => {
+        setAiErr('');
+        if (!formData.name || !formData.category) {
+            setAiErr('Add a product name and category first.');
+            return;
+        }
+        // Use specs + colors + sizes as key features for the generator
+        const features = [
+            ...formData.colors.split(',').map(s => s.trim()).filter(Boolean).map(c => `Colour: ${c}`),
+            ...formData.sizes.split(',').map(s => s.trim()).filter(Boolean).map(s => `Size: ${s}`),
+            ...specs.filter(s => s.label && s.value).map(s => `${s.label}: ${s.value}`),
+        ];
+        if (features.length === 0) {
+            setAiErr('Add at least one colour, size, or specification so the AI has something to describe.');
+            return;
+        }
+        setAiBusy(true);
+        try {
+            const { data } = await generateProductDescription({
+                name: formData.name,
+                category: formData.category,
+                key_features: features,
+            });
+            if (data?.description) {
+                setFormData(prev => ({ ...prev, description: data.description }));
+            }
+        } catch (err) {
+            setAiErr(err.response?.data?.error || 'Failed to generate description.');
+        } finally {
+            setAiBusy(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -172,7 +208,18 @@ const AddProduct = () => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Description</label>
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium text-gray-700">Description</label>
+                        <button
+                            type="button"
+                            onClick={handleGenerateDescription}
+                            disabled={aiBusy}
+                            className="flex items-center gap-1 text-xs px-2 py-1 border border-[#C6A35E] text-[#C6A35E] rounded hover:bg-[#C6A35E] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <SparklesIcon className="h-3 w-3" />
+                            {aiBusy ? 'Writing…' : 'Generate with AI'}
+                        </button>
+                    </div>
                     <textarea
                         name="description"
                         value={formData.description}
@@ -180,6 +227,7 @@ const AddProduct = () => {
                         rows="4"
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     ></textarea>
+                    {aiErr && <p className="text-xs text-red-500 mt-1">{aiErr}</p>}
                 </div>
 
                 {/* Enhanced Fields */}

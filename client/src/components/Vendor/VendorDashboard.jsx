@@ -3,6 +3,7 @@ import { getVendorStats, getVendorProducts, getVendorOrders, updateProduct, dele
 import { CurrencyDollarIcon, ShoppingBagIcon, ExclamationTriangleIcon, PencilSquareIcon, TrashIcon, Squares2X2Icon, ClipboardDocumentListIcon, CubeIcon, Cog6ToothIcon, UserGroupIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import EmptyState from '../Common/EmptyState';
+import AnalyticsAssistant from './AnalyticsAssistant';
 
 const VendorDashboard = () => {
     const navigate = useNavigate();
@@ -242,6 +243,9 @@ const VendorDashboard = () => {
                             <MetricCard title="Orders Pending" value={stats.pendingOrders} icon={ShoppingBagIcon} color="bg-gray-200 text-gray-600" />
                             <MetricCard title="Store Followers" value={followers.length} icon={UserGroupIcon} color="bg-orange-100 text-orange-600" />
                         </div>
+
+                        {/* AI Analytics Assistant — tool-routed, no text-to-SQL */}
+                        <AnalyticsAssistant />
                     </div>
                 )}
 

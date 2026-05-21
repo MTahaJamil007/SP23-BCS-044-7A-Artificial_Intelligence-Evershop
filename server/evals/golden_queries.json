@@ -1,0 +1,185 @@
+{
+  "notes": "Hand-picked queries with expected product IDs from the real DB. Duplicates in the catalog (e.g. Apple MacBook Pro is both #41 and #64) are intentionally included in expected_product_ids — any one of them is a correct retrieval.",
+  "queries": [
+    {
+      "query": "Apple MacBook Pro",
+      "expected_product_ids": [41, 64],
+      "type": "exact-brand-product",
+      "notes": "Exact name/brand match"
+    },
+    {
+      "query": "Rolex Submariner",
+      "expected_product_ids": [61, 84],
+      "type": "exact-brand-product",
+      "notes": "Exact watch model"
+    },
+    {
+      "query": "Nike Air Jordan",
+      "expected_product_ids": [51, 74],
+      "type": "exact-brand-product",
+      "notes": "Exact sneaker model"
+    },
+    {
+      "query": "Apple Airpods",
+      "expected_product_ids": [63, 86],
+      "type": "exact-brand-product",
+      "notes": ""
+    },
+    {
+      "query": "Amazon Echo Plus",
+      "expected_product_ids": [62, 85],
+      "type": "exact-brand-product",
+      "notes": ""
+    },
+    {
+      "query": "DELL XPS laptop",
+      "expected_product_ids": [45, 68],
+      "type": "exact-brand-product",
+      "notes": ""
+    },
+    {
+      "query": "Samsung curved monitor",
+      "expected_product_ids": [14, 34],
+      "type": "brand-and-feature",
+      "notes": ""
+    },
+    {
+      "query": "luxury swiss watch",
+      "expected_product_ids": [57, 58, 59, 60, 61, 80, 81, 82, 83, 84],
+      "type": "semantic-category",
+      "notes": "Should return Rolex/Longines"
+    },
+    {
+      "query": "premium laptop for programmers",
+      "expected_product_ids": [41, 42, 43, 44, 45, 64, 65, 66, 67, 68],
+      "type": "semantic-category",
+      "notes": "Any laptop"
+    },
+    {
+      "query": "running shoes",
+      "expected_product_ids": [52, 53, 54, 55, 75, 76, 77, 78],
+      "type": "semantic-category",
+      "notes": "Athletic sneakers"
+    },
+    {
+      "query": "winter jacket for women",
+      "expected_product_ids": [15, 16, 17, 35, 36, 37],
+      "type": "semantic-category",
+      "notes": "Snowboard, faux leather, rain jackets"
+    },
+    {
+      "query": "cheap t-shirts",
+      "expected_product_ids": [2, 4, 18, 19, 20, 22, 38, 39, 40, 47, 70],
+      "type": "semantic-with-price-hint",
+      "notes": "All t-shirts (mens or womens) priced under $30. Vector alone ignores 'cheap'."
+    },
+    {
+      "query": "external hard drive",
+      "expected_product_ids": [9, 12, 29, 32],
+      "type": "exact-category",
+      "notes": ""
+    },
+    {
+      "query": "SSD storage",
+      "expected_product_ids": [10, 11, 30, 31],
+      "type": "exact-category",
+      "notes": ""
+    },
+    {
+      "query": "gold bracelet",
+      "expected_product_ids": [5, 6, 25, 26],
+      "type": "semantic-category",
+      "notes": "Jewelry containing gold"
+    },
+    {
+      "query": "plaid shirt for men",
+      "expected_product_ids": [46, 48, 50, 69, 71, 73],
+      "type": "semantic-category",
+      "notes": "Check/plaid pattern"
+    },
+    {
+      "query": "leather biker jacket",
+      "expected_product_ids": [16, 36],
+      "type": "semantic-specific",
+      "notes": "Lock and Love faux-leather moto"
+    },
+    {
+      "query": "snowboarding gear",
+      "expected_product_ids": [15, 35],
+      "type": "semantic-vague",
+      "notes": "Should still find the snowboard jacket"
+    },
+    {
+      "query": "laptop backpack",
+      "expected_product_ids": [1, 21],
+      "type": "semantic-specific",
+      "notes": "Fjallraven backpack for 15-inch laptop"
+    },
+    {
+      "query": "rain coat",
+      "expected_product_ids": [17, 37],
+      "type": "semantic-specific",
+      "notes": ""
+    },
+    {
+      "query": "puma sneakers",
+      "expected_product_ids": [53, 76],
+      "type": "exact-brand",
+      "notes": ""
+    },
+    {
+      "query": "wireless earbuds",
+      "expected_product_ids": [63, 86],
+      "type": "semantic-feature",
+      "notes": "Airpods are wireless earbuds"
+    },
+    {
+      "query": "smart speaker",
+      "expected_product_ids": [62, 85],
+      "type": "semantic-feature",
+      "notes": "Amazon Echo is a smart speaker"
+    },
+    {
+      "query": "gaming monitor",
+      "expected_product_ids": [14, 34],
+      "type": "semantic-feature",
+      "notes": "Samsung 49-inch curved gaming monitor"
+    },
+    {
+      "query": "Mens casual shirt",
+      "expected_product_ids": [2, 4, 22, 24, 46, 47, 48, 49, 50, 69, 70, 71, 72, 73],
+      "type": "semantic-category",
+      "notes": ""
+    },
+    {
+      "query": "expensive watch",
+      "expected_product_ids": [58, 59, 60, 61, 81, 82, 83, 84],
+      "type": "semantic-with-price-hint",
+      "notes": "Should favor Rolex (>$8000) over Brown Leather Belt Watch ($89)"
+    },
+    {
+      "query": "diamond ring",
+      "expected_product_ids": [6, 7, 26, 27],
+      "type": "semantic-category",
+      "notes": "Princess-cut, micropave often diamond settings"
+    },
+    {
+      "query": "Lenovo Yoga",
+      "expected_product_ids": [44, 67],
+      "type": "exact-brand-product",
+      "notes": ""
+    },
+    {
+      "query": "Huawei Matebook",
+      "expected_product_ids": [43, 66],
+      "type": "exact-brand-product",
+      "notes": ""
+    },
+    {
+      "query": "red sneakers",
+      "expected_product_ids": [51, 54, 55, 74, 77, 78],
+      "type": "semantic-color",
+      "notes": "Red/off-white red sneakers and Air Jordans"
+    }
+  ]
+}

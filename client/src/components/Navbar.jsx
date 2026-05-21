@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { MagnifyingGlassIcon, ShoppingBagIcon, UserIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ShoppingBagIcon, UserIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import SmartSearch from './SmartSearch/SmartSearch';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { cartTotal } = useCart();
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
     const user = JSON.parse(localStorage.getItem('user'));
 
     const isHomePage = location.pathname === '/';
@@ -27,14 +26,6 @@ const Navbar = () => {
         localStorage.removeItem('user');
         navigate('/login');
         window.location.reload();
-    };
-
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-            setIsSearchOpen(false);
-        }
     };
 
     // Dynamic Classes
@@ -62,20 +53,12 @@ const Navbar = () => {
                     </Link>
                 </div>
 
-                {/* Center: Search Bar (Desktop) - Replaces Links when open or just always visible if preferred, let's make it expand */}
-                <div className={`hidden lg:flex flex-1 max-w-xl mx-12 transition-all duration-300 ${isSearchOpen ? 'opacity-100 scale-100' : 'opacity-100'}`}>
-                     <form onSubmit={handleSearchSubmit} className="relative w-full group">
-                        <input 
-                            type="text" 
-                            placeholder="Search our collection..." 
-                            className={`w-full px-5 py-2.5 rounded-full border focus:outline-none focus:ring-1 focus:ring-[#C6A35E] focus:border-[#C6A35E] transition-all font-sans text-sm ${inputBg}`}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <button type="submit" className={`absolute right-3 top-1/2 -translate-y-1/2 ${isHomePage && !isScrolled ? 'text-white' : 'text-gray-400 hover:text-[#C6A35E]'}`}>
-                            <MagnifyingGlassIcon className="h-5 w-5" />
-                        </button>
-                    </form>
+                {/* Center: Smart Search (AI-powered hybrid search with optional voice) */}
+                <div className="hidden lg:flex flex-1 max-w-xl mx-12">
+                    <SmartSearch
+                        inputClassName={inputBg}
+                        iconClassName={isHomePage && !isScrolled ? 'text-white hover:text-white/80' : 'text-gray-400 hover:text-[#C6A35E]'}
+                    />
                 </div>
 
                 {/* Right: Icons & Links */}

@@ -11,6 +11,7 @@ import CustomerDashboard from './components/Customer/CustomerDashboard';
 import VendorStoreFront from './components/Customer/VendorStoreFront';
 import FashionPage from './components/Customer/CategoryPages/FashionPage';
 import ElectronicsPage from './components/Customer/CategoryPages/ElectronicsPage';
+import AIAssistant from './components/AIAssistant/AIAssistant';
 
 // Auth
 import Login from './components/Auth/Login';
@@ -33,19 +34,19 @@ function App() {
       <CartProvider>
          <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<><Navbar /><HomePage /><Footer /></>} />
-            <Route path="/search" element={<><Navbar /><SearchPage /><Footer /></>} />
-            <Route path="/product/:id" element={<><Navbar /><ProductDetailLuxury /><Footer /></>} />
-            <Route path="/cart" element={<><Navbar /><Cart /><Footer /></>} />
-            <Route path="/store/:vendorId" element={<><Navbar /><VendorStoreFront /><Footer /></>} />
-            <Route path="/category/fashion" element={<><Navbar /><FashionPage /><Footer /></>} />
-            <Route path="/category/electronics" element={<><Navbar /><ElectronicsPage /><Footer /></>} />
+            <Route path="/" element={<><Navbar /><HomePage /><Footer /><AIAssistant /></>} />
+            <Route path="/search" element={<><Navbar /><SearchPage /><Footer /><AIAssistant /></>} />
+            <Route path="/product/:id" element={<><Navbar /><ProductDetailLuxury /><Footer /><AIAssistant /></>} />
+            <Route path="/cart" element={<><Navbar /><Cart /><Footer /><AIAssistant /></>} />
+            <Route path="/store/:vendorId" element={<><Navbar /><VendorStoreFront /><Footer /><AIAssistant /></>} />
+            <Route path="/category/fashion" element={<><Navbar /><FashionPage /><Footer /><AIAssistant /></>} />
+            <Route path="/category/electronics" element={<><Navbar /><ElectronicsPage /><Footer /><AIAssistant /></>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
             {/* Customer Protected Route */}
             <Route path="/account" element={<ProtectedRoute allowedRoles={['Customer', 'Vendor', 'Administrator']} />}>
-                 <Route index element={<><Navbar /><CustomerDashboard /><Footer /></>} />
+                 <Route index element={<><Navbar /><CustomerDashboard /><Footer /><AIAssistant /></>} />
             </Route>
 
             {/* Admin Routes (Protected) */}
